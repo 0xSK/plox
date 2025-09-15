@@ -1,4 +1,5 @@
 from plox.token import Token, TokenType
+from plox.logger import error
 from typing import Any
 
 
@@ -9,7 +10,7 @@ class Scanner:
         self.start: int = 0
         self.current: int = 0
         self.line: int = 1
-        
+
         self.scan_tokens()
 
     def scan_tokens(self) -> None:
@@ -73,11 +74,10 @@ class Scanner:
                 else:
                     # this is a divide
                     self.add_token_simple(TokenType.SLASH)
-            case " ":
-                pass
-            case "\r":
-                pass
-            case "\t":
+            case '"':
+                self.parse_string()
+            # ignored whitespace
+            case " " | "\r" | "\t":
                 pass
             case "\n":
                 self.line += 1
@@ -122,3 +122,19 @@ class Scanner:
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
+
+    def parse_string(self) -> None:
+        while self.peek() != '"' and not self.is_at_end():
+            if self.peek() == "\n":
+                self.line += 1
+            self.advance()
+
+        if self.is_at_end():
+            error(self.line, "Unterminated string")
+            return
+
+        # get the closing "
+        self.advance()
+
+        stringVal: str = self.source[self.start + 1 : self.current - 1]
+        self.add_token_literal(tokenType=TokenType.STRING, literal=stringVal)

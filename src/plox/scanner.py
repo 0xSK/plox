@@ -1,0 +1,124 @@
+from plox.token import Token, TokenType
+from typing import Any
+
+
+class Scanner:
+    def __init__(self, source: str) -> None:
+        self.source: str = source
+        self.tokens: list[Token] = []
+        self.start: int = 0
+        self.current: int = 0
+        self.line: int = 1
+        
+        self.scan_tokens()
+
+    def scan_tokens(self) -> None:
+        while not self.is_at_end():
+            self.start = self.current
+            self.scan_token()
+
+        self.tokens.append(
+            Token(type=TokenType.EOF, lexeme="", literal=None, line=self.line)
+        )
+
+    def scan_token(self) -> None:
+        currChar: str = self.advance()
+        match currChar:
+            case "(":
+                self.add_token_simple(TokenType.LEFT_PAREN)
+            case ")":
+                self.add_token_simple(TokenType.RIGHT_PAREN)
+            case "{":
+                self.add_token_simple(TokenType.LEFT_BRACE)
+            case "}":
+                self.add_token_simple(TokenType.RIGHT_BRACE)
+            case ",":
+                self.add_token_simple(TokenType.COMMA)
+            case ".":
+                self.add_token_simple(TokenType.DOT)
+            case "-":
+                self.add_token_simple(TokenType.MINUS)
+            case "+":
+                self.add_token_simple(TokenType.PLUS)
+            case ";":
+                self.add_token_simple(TokenType.SEMICOLON)
+            case "*":
+                self.add_token_simple(TokenType.STAR)
+            case "!":
+                if self.match("="):
+                    self.add_token_simple(TokenType.BANG_EQUAL)
+                else:
+                    self.add_token_simple(TokenType.BANG)
+            case "=":
+                if self.match("="):
+                    self.add_token_simple(TokenType.EQUAL_EQUAL)
+                else:
+                    self.add_token_simple(TokenType.EQUAL)
+            case "<":
+                if self.match("="):
+                    self.add_token_simple(TokenType.LESS_EQUAL)
+                else:
+                    self.add_token_simple(TokenType.LESS)
+            case ">":
+                if self.match("="):
+                    self.add_token_simple(TokenType.GREATER_EQUAL)
+                else:
+                    self.add_token_simple(TokenType.GREATER)
+            case "/":
+                # see if this is divide or a line comment
+                if self.match("/"):
+                    # this is a line comment, ignore everything until the end of the line
+                    while self.peek() != "\n" and not self.is_at_end():
+                        self.advance()
+                else:
+                    # this is a divide
+                    self.add_token_simple(TokenType.SLASH)
+            case " ":
+                pass
+            case "\r":
+                pass
+            case "\t":
+                pass
+            case "\n":
+                self.line += 1
+            case _:
+                self.add_token_simple(TokenType.UNIMPLEMENTED)
+
+    def advance(self) -> str:
+        """
+        returns the character at the `current` index,
+        and increments the `current` index
+        """
+        curr_char = self.source[self.current]
+        self.current += 1
+        return curr_char
+
+    def peek(self) -> str:
+        """
+        returns the character at the `current` index,
+        *without* incrementing the `current` index
+        """
+        if self.is_at_end():
+            return "\0"
+        return self.source[self.current]
+
+    def match(self, expectedChar: str) -> bool:
+        if self.is_at_end():
+            return False
+        if self.peek() == expectedChar:
+            self.advance()
+            return True
+        else:
+            return False
+
+    def add_token_simple(self, tokenType: TokenType) -> None:
+        self.add_token_literal(tokenType=tokenType, literal=None)
+
+    def add_token_literal(self, tokenType: TokenType, literal: Any) -> None:
+        lexeme = self.source[self.start : self.current]
+        self.tokens.append(
+            Token(type=tokenType, lexeme=lexeme, literal=literal, line=self.line)
+        )
+
+    def is_at_end(self) -> bool:
+        return self.current >= len(self.source)

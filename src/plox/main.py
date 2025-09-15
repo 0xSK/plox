@@ -4,7 +4,9 @@ Main entry point for the Plox interpreter.
 
 import sys
 from pathlib import Path
+from plox.scanner import Scanner
 
+had_error: bool = False
 
 def main() -> None:
     """Main entry point for the Plox interpreter."""
@@ -18,6 +20,8 @@ def main() -> None:
         # Run REPL
         run_prompt()
 
+    if had_error:
+        sys.exit(65)
 
 def run_file(path: str) -> None:
     """Run a Lox script from a file."""
@@ -33,12 +37,10 @@ def run_file(path: str) -> None:
     
     # TODO: Implement interpreter
     print(f"Running file: {path}")
-    print(f"Source code:\n{source}")
-
+    run(source)
 
 def run_prompt() -> None:
     """Run the interactive REPL."""
-    print("Plox interpreter v0.1.0")
     print("Type 'exit' or 'quit' to exit")
     print()
     
@@ -46,10 +48,12 @@ def run_prompt() -> None:
         try:
             line = input("plox> ")
             if line.lower() in ('exit', 'quit'):
+                print("Goodbye!")
                 break
             
             # TODO: Implement interpreter
-            print(f"Input: {line}")
+            run(line)
+            had_error = False
             
         except KeyboardInterrupt:
             print("\nGoodbye!")
@@ -57,6 +61,19 @@ def run_prompt() -> None:
         except EOFError:
             print("\nGoodbye!")
             break
+
+def run(source: str) -> None:
+    """Run the source code."""
+
+    scanner = Scanner(source)
+    # for now, just print the source and parsed tokens
+    print(f"Source: {scanner.source}")
+    from pprint import pformat
+    print(f"Tokens:\n{pformat(scanner.tokens)}")
+
+def error(line: int, message: str) -> None:
+    """Print an error message."""
+    print(f"[line {line}] Error: {message}")
 
 
 if __name__ == "__main__":

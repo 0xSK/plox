@@ -74,8 +74,12 @@ class Scanner:
                 else:
                     # this is a divide
                     self.add_token_simple(TokenType.SLASH)
+            # beginning of a string
             case '"':
                 self.parse_string()
+            # beginning of a number
+            case _ if "0" <= currChar <= "9":
+                self.parse_number()
             # ignored whitespace
             case " " | "\r" | "\t":
                 pass
@@ -123,6 +127,9 @@ class Scanner:
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
 
+    def character_is_digit(self, char: str) -> bool:
+        return "0" <= char <= "9"
+
     def parse_string(self) -> None:
         while self.peek() != '"' and not self.is_at_end():
             if self.peek() == "\n":
@@ -138,3 +145,16 @@ class Scanner:
 
         stringVal: str = self.source[self.start + 1 : self.current - 1]
         self.add_token_literal(tokenType=TokenType.STRING, literal=stringVal)
+
+    def parse_number(self) -> None:
+        while self.character_is_digit(self.peek()):
+            self.advance()
+
+        # handle a decimal in the number
+        if self.peek() == ".":
+            self.advance()
+            while self.character_is_digit(self.peek()):
+                self.advance()
+
+        numberVal: float = float(self.source[self.start : self.current])
+        self.add_token_literal(tokenType=TokenType.NUMBER, literal=numberVal)

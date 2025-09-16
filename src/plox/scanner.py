@@ -80,6 +80,9 @@ class Scanner:
             # beginning of a number
             case _ if "0" <= currChar <= "9":
                 self.parse_number()
+            # beginning of an identifier
+            case _ if self.character_is_alpha(currChar):
+                self.parse_identifier()
             # ignored whitespace
             case " " | "\r" | "\t":
                 pass
@@ -130,6 +133,12 @@ class Scanner:
     def character_is_digit(self, char: str) -> bool:
         return "0" <= char <= "9"
 
+    def character_is_alpha(self, char: str) -> bool:
+        return ("a" <= char <= "z") or ("A" <= char <= "Z") or char == "_"
+
+    def character_is_alphanumeric(self, char: str) -> bool:
+        return self.character_is_alpha(char) or self.character_is_digit(char)
+
     def parse_string(self) -> None:
         while self.peek() != '"' and not self.is_at_end():
             if self.peek() == "\n":
@@ -158,3 +167,33 @@ class Scanner:
 
         numberVal: float = float(self.source[self.start : self.current])
         self.add_token_literal(tokenType=TokenType.NUMBER, literal=numberVal)
+
+    def parse_identifier(self) -> None:
+        while self.character_is_alphanumeric(self.peek()):
+            self.advance()
+
+        identifierName: str = self.source[self.start : self.current]
+        reservedKeywords: list[str] = [
+            "and",
+            "class",
+            "else",
+            "false",
+            "for",
+            "fun",
+            "if",
+            "nil",
+            "or",
+            "print",
+            "return",
+            "super",
+            "this",
+            "true",
+            "var",
+            "while",
+        ]
+        if identifierName in reservedKeywords:
+            tokenType = TokenType[identifierName.upper()]
+        else:
+            tokenType = TokenType.IDENTIFIER
+
+        self.add_token_simple(tokenType)

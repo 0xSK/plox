@@ -97,14 +97,14 @@ class Scanner:
         self.current += 1
         return curr_char
 
-    def peek(self) -> str:
+    def peek(self, ahead: int = 0) -> str:
         """
-        returns the character at the `current` index,
+        returns the character at the `current` + `ahead` index,
         *without* incrementing the `current` index
         """
-        if self.is_at_end():
+        if self.current + ahead >= len(self.source):
             return "\0"
-        return self.source[self.current]
+        return self.source[self.current + ahead]
 
     def match(self, expectedChar: str) -> bool:
         if self.is_at_end():
@@ -151,7 +151,7 @@ class Scanner:
             self.advance()
 
         # handle a decimal in the number
-        if self.peek() == ".":
+        if self.peek() == "." and self.character_is_digit(self.peek(1)):
             self.advance()
             while self.character_is_digit(self.peek()):
                 self.advance()

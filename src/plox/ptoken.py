@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from typing import Any
 
-class TokenType(Enum):
+class PTokenType(Enum):
     # Single-character tokens.
     LEFT_PAREN = auto()
     RIGHT_PAREN = auto()
@@ -54,9 +54,9 @@ class TokenType(Enum):
     # only while in development
     UNIMPLEMENTED = auto()
 
-class Token:
+class PToken:
     def __init__(self, 
-        type: TokenType, 
+        type: PTokenType, 
         lexeme: str, 
         literal: Any, 
         line: int

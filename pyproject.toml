@@ -7,7 +7,7 @@ name = "plox"
 version = "0.1.0"
 description = "A Python interpreter for the Lox programming language"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     {name = "Shreyas Kishore", email = "i@0xsk.io"},
 ]

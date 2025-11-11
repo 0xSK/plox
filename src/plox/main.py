@@ -5,6 +5,8 @@ Main entry point for the Plox interpreter.
 import sys
 from pathlib import Path
 from plox.scanner import Scanner
+from plox.parser import Parser
+from plox.expression import AstPrinter
 
 had_error: bool = False
 
@@ -67,9 +69,15 @@ def run(source: str) -> None:
 
     scanner = Scanner(source)
     # for now, just print the source and parsed tokens
-    print(f"Source: {scanner.source}")
-    from pprint import pformat
-    print(f"Tokens:\n{pformat(scanner.tokens)}")
+    expr = Parser(scanner.tokens).parse()
+    
+    if expr is None:
+        had_error = True
+        print("Error was had.")
+        return
+    
+    print(AstPrinter().pformat(expr))
+    
 
 def error(line: int, message: str) -> None:
     """Print an error message."""

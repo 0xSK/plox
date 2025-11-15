@@ -25,3 +25,7 @@ class PloxSyntaxError(PloxErrorBase):
 class PloxNotImplementedError(PloxErrorBase):
     """Errors detected during scanning/parsing."""
     pass
+
+class PloxRuntimeError(PloxErrorBase):
+    """Errors detected during scanning/parsing."""
+    pass

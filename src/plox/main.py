@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from plox.scanner import Scanner
 from plox.parser import Parser
+from plox.interpreter import Interpreter
 from plox.expression import AstPrinter
 
 had_error: bool = False
@@ -73,10 +74,12 @@ def run(source: str) -> None:
     
     if expr is None:
         had_error = True
-        print("Error was had.")
+        print("Error was had in parsing.")
         return
     
-    print(AstPrinter().pformat(expr))
+    Interpreter().interpret(expr)
+    
+    # print(AstPrinter().pformat(expr))
     
 
 def error(line: int, message: str) -> None:

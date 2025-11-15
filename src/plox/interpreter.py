@@ -10,6 +10,7 @@ from plox.ptoken import PTokenType, PToken
 from functools import singledispatchmethod
 from plox.errors import PloxRuntimeError
 from plox.logger import error
+import math
 from typing import TypeGuard
 
 
@@ -72,7 +73,13 @@ class Interpreter(Visitor[object]):
             case PTokenType.SLASH:
                 if self.check_number_operand(leftObj, expr.operator):
                     if self.check_number_operand(rightObj, expr.operator):
-                        return leftObj / rightObj
+                        try:
+                            return leftObj / rightObj
+                        except ZeroDivisionError:
+                            # emulate Lox division
+                            if leftObj == 0.0:
+                                return math.nan
+                            return math.inf if leftObj > 0 else -math.inf
             case PTokenType.STAR:
                 if self.check_number_operand(leftObj, expr.operator):
                     if self.check_number_operand(rightObj, expr.operator):
